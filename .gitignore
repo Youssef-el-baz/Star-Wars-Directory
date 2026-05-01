@@ -11,6 +11,10 @@
 npm-debug.log
 yarn-error.log
 
+# Environment / secrets
+.env
+.env.*
+
 # IDEs and editors
 .idea/
 .project
@@ -38,6 +42,9 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+
+# Logs
+*.log
 
 # System files
 .DS_Store
