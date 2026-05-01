@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.cell {
+  border-bottom: 1px solid rgb(30 41 59); /* slate-800 */
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: rgb(226 232 240); /* slate-200 */
+  vertical-align: top;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 4px;
+  width: 1px;
+  height: 100%;
+  background: rgb(51 65 85); /* slate-700 */
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+th:hover .resize-handle::after {
+  opacity: 1;
+}

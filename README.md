@@ -1,59 +1,66 @@
-# StarWarsGrid
+# Star Wars Data Grid (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.9.
+Single-page Angular app that displays **Starships** from **SWAPI** in a feature-rich data grid.
 
-## Development server
-
-To start a local development server, run:
+## Setup
 
 ```bash
-ng serve
+npm install
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open: http://localhost:4200
 
-## Code scaffolding
+## SWAPI Resource
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Resource used: `https://swapi.dev/api/starships/`
+
+## Data Grid Features
+
+### Infinite scroll (server-side pagination)
+- Uses SWAPI pagination via `?page=`
+- Fetches next page automatically when you scroll near the bottom of the grid
+- **No loader / spinner while scrolling** (rows appear seamlessly)
+- Pages are cached client-side in-memory so they are not requested again
+- When `next === null`, the grid shows an “End of list” message and stops requesting more pages
+
+### Search
+- Global search input above the grid
+- Filters rows by **name**
+- Shows a clear empty state when no rows match
+- To avoid overfetch, the app **does not fetch more pages while searching** (search filters already-loaded rows)
+
+### Editable cells
+- The **Crew** column is editable (client-state only)
+- Start editing by **double-clicking** the Crew cell
+- Confirm with **Enter** (or blur)
+- Cancel with **Escape**
+- Edits are stored in client state (`Map<starshipId, Partial<Starship>>`) and do not write to SWAPI
+- This is designed so it can be replaced later with API writes
+
+### Column resizing
+- Columns can be resized by dragging the handle on the right side of a header cell
+- Width is applied immediately in the UI
+
+## Error handling
+- Initial load: shows an error message + **Retry**
+- Load-more errors (while scrolling): shows a small non-blocking banner + **Retry**
+
+## Testing
 
 ```bash
-ng generate component component-name
+npm test
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Includes:
+- 1 unit test suite for `SwapiService` (cache + pagination helpers + error stream)
+- 1 unit test suite for `StarshipGridComponent` (editing + empty state)
 
-```bash
-ng generate --help
-```
+## Third-party packages
+- Tailwind CSS (styling)
+- Angular Material is installed but the UI is primarily Tailwind in this solution
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Trade-offs / limitations
+- Search is client-side and only filters already-loaded rows (no server-side search)
+- Infinite scroll is disabled while searching to prevent overfetch
+- SWAPI availability is an external dependency. If `swapi.dev` has an invalid TLS certificate (for example `net::ERR_CERT_DATE_INVALID`), browsers will block requests and the app will show the built-in error + retry UI until SWAPI is fixed.

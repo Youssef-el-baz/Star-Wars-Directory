@@ -1,0 +1,126 @@
+<div class="h-full">
+  @if (loadingInitial) {
+    <div class="flex h-full items-center justify-center">
+      <div class="flex items-center gap-3 text-sm text-slate-300">
+        <span
+          class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-t-slate-200"
+        ></span>
+        <span>Loading starships…</span>
+      </div>
+    </div>
+  } @else if (initialError) {
+    <div class="mx-auto max-w-7xl p-4">
+      <div class="rounded-md border border-rose-900/40 bg-rose-950/20 p-4">
+        <div class="text-sm font-medium text-rose-200">Failed to load starships</div>
+        <div class="mt-1 text-xs text-rose-300/80">{{ initialError }}</div>
+        <button
+          type="button"
+          (click)="retryInitial()"
+          class="mt-3 rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-2 text-sm text-rose-100 hover:bg-rose-950/50"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="mx-auto flex h-full max-w-7xl flex-col px-4 py-3">
+      @if (loadMoreError) {
+        <div class="mb-3 rounded-md border border-amber-900/40 bg-amber-950/20 p-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="text-xs text-amber-200">
+              Couldn’t load more rows: <span class="text-amber-200/80">{{ loadMoreError }}</span>
+            </div>
+            <button
+              type="button"
+              (click)="retryLoadMore()"
+              class="rounded-md border border-amber-900/60 bg-amber-950/30 px-3 py-1.5 text-xs text-amber-100 hover:bg-amber-950/50"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (filteredStarships.length === 0) {
+        <div class="flex flex-1 items-center justify-center">
+          <div class="text-center text-sm text-slate-400">
+            No starships match your search.
+          </div>
+        </div>
+      } @else {
+        <div class="min-h-0 flex-1 overflow-auto rounded-md border border-slate-800" (scroll)="onScroll($event)">
+          <table class="min-w-max w-full table-fixed border-separate border-spacing-0">
+            <thead class="sticky top-0 z-10 bg-slate-950">
+              <tr>
+                @for (col of columns; track col.key) {
+                  <th
+                    class="relative border-b border-slate-800 px-3 py-2 text-left text-xs font-semibold text-slate-200"
+                    [style.width.px]="columnWidths[col.key]"
+                  >
+                    <span class="block truncate pr-4">{{ col.label }}</span>
+                    @if (col.resizable) {
+                      <span
+                        class="resize-handle"
+                        (mousedown)="startResize($event, col.key)"
+                        aria-hidden="true"
+                      ></span>
+                    }
+                  </th>
+                }
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (ship of filteredStarships; track ship.id) {
+                <tr class="hover:bg-slate-900/30">
+                  <td class="cell" [style.width.px]="columnWidths.name">{{ displayValue(ship, 'name') }}</td>
+                  <td class="cell" [style.width.px]="columnWidths.model">{{ displayValue(ship, 'model') }}</td>
+                  <td class="cell" [style.width.px]="columnWidths.manufacturer">{{ displayValue(ship, 'manufacturer') }}</td>
+
+                  <td class="cell" [style.width.px]="columnWidths.crew">
+                    @if (isEditing(ship.id, 'crew')) {
+                      <input
+                        class="w-full rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100 focus:border-slate-500 focus:outline-none"
+                        [value]="editing?.draft"
+                        (input)="editing && (editing.draft = ($any($event.target).value))"
+                        (keydown)="onEditKeydown($event)"
+                        (blur)="commitEdit()"
+                        autofocus
+                      />
+                      <div class="mt-1 text-[10px] text-slate-500">Enter to save • Esc to cancel</div>
+                    } @else {
+                      <button
+                        type="button"
+                        class="w-full text-left"
+                        (dblclick)="beginEditCrew(ship)"
+                        title="Double-click to edit"
+                      >
+                        <span class="inline-flex items-center gap-2">
+                          <span>{{ displayValue(ship, 'crew') }}</span>
+                          <span class="text-[10px] text-slate-500">edit</span>
+                        </span>
+                      </button>
+                    }
+                  </td>
+
+                  <td class="cell" [style.width.px]="columnWidths.passengers">{{ displayValue(ship, 'passengers') }}</td>
+                  <td class="cell" [style.width.px]="columnWidths.hyperdrive_rating">{{ displayValue(ship, 'hyperdrive_rating') }}</td>
+                  <td class="cell" [style.width.px]="columnWidths.MGLT">{{ displayValue(ship, 'MGLT') }}</td>
+                  <td class="cell" [style.width.px]="columnWidths.starship_class">{{ displayValue(ship, 'starship_class') }}</td>
+                </tr>
+              }
+
+              @if (hasReachedEnd) {
+                <tr>
+                  <td class="px-3 py-3 text-center text-xs text-slate-500" [attr.colspan]="columns.length">
+                    End of list — {{ starships.length }} loaded
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>
